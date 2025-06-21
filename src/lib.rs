@@ -293,4 +293,161 @@ mod tests {
         assert_eq!(list.pop(), Some(String::from("hello")));
         assert_eq!(list.pop(), None);
     }
+
+    #[test]
+    fn test_large_list() {
+        let mut list = LinkedList::new();
+        let n = 10000;
+        
+        for i in 0..n {
+            list.push(i);
+        }
+        
+        assert_eq!(list.len(), n);
+        
+        for i in (0..n).rev() {
+            assert_eq!(list.pop(), Some(i));
+        }
+        
+        assert!(list.is_empty());
+    }
+
+    #[test]
+    fn test_multiple_push_pop_cycles() {
+        let mut list = LinkedList::new();
+        
+        for _ in 0..5 {
+            list.push(1);
+            list.push(2);
+            list.push(3);
+            
+            assert_eq!(list.pop(), Some(3));
+            assert_eq!(list.pop(), Some(2));
+            assert_eq!(list.pop(), Some(1));
+            
+            assert!(list.is_empty());
+        }
+    }
+
+    #[test]
+    fn test_peek_on_empty_list() {
+        let list: LinkedList<i32> = LinkedList::new();
+        assert_eq!(list.peek(), None);
+        
+        let mut list: LinkedList<String> = LinkedList::new();
+        assert_eq!(list.peek_mut(), None);
+    }
+
+    #[test]
+    fn test_iter_on_empty_list() {
+        let list: LinkedList<i32> = LinkedList::new();
+        let mut iter = list.iter();
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn test_iter_mut_on_empty_list() {
+        let mut list: LinkedList<i32> = LinkedList::new();
+        let mut iter = list.iter_mut();
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn test_into_iter_on_empty_list() {
+        let list: LinkedList<i32> = LinkedList::new();
+        let mut iter = list.into_iter();
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn test_with_custom_type() {
+        #[derive(Debug, PartialEq, Eq)]
+        struct Point {
+            x: i32,
+            y: i32,
+        }
+        
+        let mut list = LinkedList::new();
+        list.push(Point { x: 1, y: 2 });
+        list.push(Point { x: 3, y: 4 });
+        
+        assert_eq!(list.peek(), Some(&Point { x: 3, y: 4 }));
+        assert_eq!(list.pop(), Some(Point { x: 3, y: 4 }));
+        assert_eq!(list.pop(), Some(Point { x: 1, y: 2 }));
+    }
+
+    #[test]
+    fn test_alternating_push_pop() {
+        let mut list = LinkedList::new();
+        
+        list.push(1);
+        list.push(2);
+        assert_eq!(list.pop(), Some(2));
+        
+        list.push(3);
+        list.push(4);
+        assert_eq!(list.pop(), Some(4));
+        assert_eq!(list.pop(), Some(3));
+        
+        list.push(5);
+        assert_eq!(list.len(), 2);
+        
+        assert_eq!(list.pop(), Some(5));
+        assert_eq!(list.pop(), Some(1));
+        assert!(list.is_empty());
+    }
+
+    #[test]
+    fn test_iter_count() {
+        let mut list = LinkedList::new();
+        for i in 0..10 {
+            list.push(i);
+        }
+        
+        assert_eq!(list.iter().count(), 10);
+        assert_eq!(list.len(), 10);
+    }
+
+    #[test]
+    fn test_iter_mut_modify_all() {
+        let mut list = LinkedList::new();
+        for i in 1..=5 {
+            list.push(i);
+        }
+        
+        for value in list.iter_mut() {
+            *value = *value * *value;
+        }
+        
+        let squares: Vec<_> = list.iter().copied().collect();
+        assert_eq!(squares, vec![25, 16, 9, 4, 1]);
+    }
+
+    #[test]
+    fn test_repeated_peek_mut() {
+        let mut list = LinkedList::new();
+        list.push(10);
+        
+        for _ in 0..5 {
+            if let Some(value) = list.peek_mut() {
+                *value += 1;
+            }
+        }
+        
+        assert_eq!(list.peek(), Some(&15));
+    }
+
+    #[test]
+    fn test_zero_sized_type() {
+        let mut list = LinkedList::new();
+        list.push(());
+        list.push(());
+        list.push(());
+        
+        assert_eq!(list.len(), 3);
+        assert_eq!(list.pop(), Some(()));
+        assert_eq!(list.pop(), Some(()));
+        assert_eq!(list.pop(), Some(()));
+        assert_eq!(list.pop(), None);
+    }
 }
